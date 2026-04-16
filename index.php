@@ -2,6 +2,18 @@
 require_once 'config.php';
 require_once 'functions.php';
 
+if (array_key_exists('salir', $_GET)) {
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+    }
+
+    session_destroy();
+    redirect('index');
+}
+
 require_once 'includes/header.php';
 ?>
 <section class="home-stack">

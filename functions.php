@@ -64,9 +64,34 @@ function currentParticipantId(): ?int
     return isset($_SESSION['participant_id']) ? (int) $_SESSION['participant_id'] : null;
 }
 
+function clearParticipantSession(): void
+{
+    unset($_SESSION['participante_id'], $_SESSION['participant_id']);
+}
+
 function getParticipant(int $participantId): ?array
 {
-    $statement = db()->prepare('SELECT * FROM participantes WHERE id = :id LIMIT 1');
+    $statement = db()->prepare(
+        'SELECT
+            p.id,
+            p.usuario_id,
+            p.gano_juego,
+            p.preguntas_aprobadas,
+            p.respuestas_json,
+            p.fecha_respondio,
+            p.fecha_participacion,
+            u.nombre,
+            u.apellido,
+            u.email,
+            u.celular,
+            u.dni,
+            u.acepta_bases,
+            u.fecha_registro
+         FROM participacion p
+         INNER JOIN usuarios u ON u.id = p.usuario_id
+         WHERE p.id = :id
+         LIMIT 1'
+    );
     $statement->execute(['id' => $participantId]);
     $participant = $statement->fetch();
 
@@ -78,10 +103,40 @@ function currentParticipant(): ?array
     $participantId = currentParticipantId();
 
     if ($participantId === null) {
+        if (isset($_SESSION['usuario_id'])) {
+            $todayParticipationId = loginUserForToday((int) $_SESSION['usuario_id']);
+            $_SESSION['participante_id'] = $todayParticipationId;
+            return getParticipant($todayParticipationId);
+        }
+
         return null;
     }
 
-    return getParticipant($participantId);
+    $participant = getParticipant($participantId);
+    if ($participant === null) {
+        clearParticipantSession();
+        return null;
+    }
+
+    $_SESSION['usuario_id'] = (int) $participant['usuario_id'];
+
+    $statement = db()->prepare(
+        'SELECT 1
+         FROM participacion
+         WHERE id = :id AND fecha_participacion = CURDATE()
+         LIMIT 1'
+    );
+    $statement->execute(['id' => $participantId]);
+
+    if (!$statement->fetchColumn()) {
+        $todayParticipationId = loginUserForToday((int) $participant['usuario_id']);
+        $_SESSION['participante_id'] = $todayParticipationId;
+        $_SESSION['participant_id'] = $todayParticipationId;
+
+        return getParticipant($todayParticipationId);
+    }
+
+    return $participant;
 }
 
 function requireParticipant(): array
@@ -117,8 +172,24 @@ function hasStartedGame(int $participantId): bool
     return (int) $statement->fetchColumn() > 0;
 }
 
+function hasFailedButton(int $participantId): bool
+{
+    $statement = db()->prepare(
+        'SELECT COUNT(*)
+         FROM intentos_botones
+         WHERE participante_id = :participante_id AND resultado = 0'
+    );
+    $statement->execute(['participante_id' => $participantId]);
+
+    return (int) $statement->fetchColumn() > 0;
+}
+
 function isGameComplete(int $participantId): bool
 {
+    if (hasFailedButton($participantId)) {
+        return true;
+    }
+
     foreach (getButtonStatuses($participantId) as $status) {
         if ($status === null) {
             return false;
@@ -145,23 +216,27 @@ function recordButtonResult(int $participantId, int $buttonNumber, bool $result)
 function finalizeGame(int $participantId): array
 {
     $statuses = getButtonStatuses($participantId);
-    $completed = true;
-    $won = true;
+    $completed = false;
+    $won = false;
 
-    foreach ($statuses as $status) {
-        if ($status === null) {
-            $completed = false;
-            $won = false;
-            break;
-        }
+    if (in_array(false, $statuses, true)) {
+        $completed = true;
+        $won = false;
+    } else {
+        $completed = true;
+        $won = true;
 
-        if ($status !== true) {
-            $won = false;
+        foreach ($statuses as $status) {
+            if ($status === null) {
+                $completed = false;
+                $won = false;
+                break;
+            }
         }
     }
 
     if ($completed) {
-        $statement = db()->prepare('UPDATE participantes SET gano_juego = :gano_juego WHERE id = :id');
+        $statement = db()->prepare('UPDATE participacion SET gano_juego = :gano_juego WHERE id = :id');
         $statement->execute([
             'gano_juego' => $won ? 1 : 0,
             'id' => $participantId,
@@ -171,8 +246,37 @@ function finalizeGame(int $participantId): array
     return [
         'statuses' => $statuses,
         'completed' => $completed,
-        'won' => $completed && $won,
+        'won' => $won,
     ];
+}
+
+function resetParticipantProgress(int $participantId): void
+{
+    $pdo = db();
+    $pdo->beginTransaction();
+
+    try {
+        $deleteAttempts = $pdo->prepare('DELETE FROM intentos_botones WHERE participante_id = :participante_id');
+        $deleteAttempts->execute(['participante_id' => $participantId]);
+
+        $updateParticipant = $pdo->prepare(
+            'UPDATE participacion
+             SET gano_juego = 0,
+                 preguntas_aprobadas = NULL,
+                 respuestas_json = NULL,
+                 fecha_respondio = NULL
+             WHERE id = :id'
+        );
+        $updateParticipant->execute(['id' => $participantId]);
+
+        $pdo->commit();
+    } catch (Throwable $throwable) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        throw $throwable;
+    }
 }
 
 function randomChance(float $probability): bool
@@ -187,36 +291,30 @@ function seedSlotString(DateTimeImmutable $slot): string
     return $slot->format('Y-m-d H:i:00');
 }
 
-function getActiveSeedSlot(DateTimeImmutable $now): DateTimeImmutable
-{
-    $slot = $now->setTime((int) $now->format('H'), SEED_MINUTE, 0);
-
-    if ($now < $slot) {
-        $slot = $slot->modify('-1 hour');
-    }
-
-    return $slot;
-}
-
 function ensureSeedSlot(DateTimeImmutable $slot): void
 {
     $statement = db()->prepare('INSERT IGNORE INTO semillas_horarias (franja_semilla) VALUES (:franja_semilla)');
     $statement->execute(['franja_semilla' => seedSlotString($slot)]);
 }
 
-function claimSeedWinner(DateTimeImmutable $slot, int $participantId): bool
+function claimSeedWinner(int $participantId): bool
 {
     $pdo = db();
     $pdo->beginTransaction();
 
     try {
-        ensureSeedSlot($slot);
-
-        $select = $pdo->prepare('SELECT id, participante_ganador_id FROM semillas_horarias WHERE franja_semilla = :franja_semilla LIMIT 1 FOR UPDATE');
-        $select->execute(['franja_semilla' => seedSlotString($slot)]);
+        $select = $pdo->prepare(
+            'SELECT id
+             FROM semillas_horarias
+             WHERE franja_semilla <= NOW() AND participante_ganador_id IS NULL
+             ORDER BY franja_semilla ASC
+             LIMIT 1
+             FOR UPDATE'
+        );
+        $select->execute();
         $row = $select->fetch();
 
-        if (!$row || $row['participante_ganador_id'] !== null) {
+        if (!$row) {
             $pdo->commit();
             return false;
         }
@@ -244,33 +342,56 @@ function claimSeedWinner(DateTimeImmutable $slot, int $participantId): bool
     }
 }
 
+function secondsUntilNextSeed(): int
+{
+    $statement = db()->query(
+        'SELECT TIMESTAMPDIFF(SECOND, NOW(), franja_semilla) AS segundos
+         FROM semillas_horarias
+         WHERE participante_ganador_id IS NULL
+         ORDER BY franja_semilla ASC
+         LIMIT 1'
+    );
+    $result = $statement->fetchColumn();
+
+    return $result !== false ? (int) $result : 3000000;
+}
+
+function evaluateButton(int $participantId, int $buttonNumber): bool
+{
+    if ($buttonNumber === 4) {
+        return claimSeedWinner($participantId);
+    }
+
+    $secondsLeft = secondsUntilNextSeed();
+    return match ($buttonNumber) {
+        1 => $secondsLeft < 60  || randomChance(0.60),
+        2 => $secondsLeft < 20  || randomChance(0.40),
+        3 => $secondsLeft < 10  || randomChance(0.10),
+        default => false,
+    };
+}
+
+function otherPosition(int $buttonNumber, int $sentPosition): int
+{
+    $maxPositions = [1 => 4, 2 => 3, 3 => 3, 4 => 2];
+    $others = array_values(array_filter(
+        range(1, $maxPositions[$buttonNumber]),
+        fn($p) => $p !== $sentPosition
+    ));
+
+    return $others[array_rand($others)];
+}
+
 function evaluateLastButton(int $participantId): bool
 {
-    $now = new DateTimeImmutable();
-    $activeSlot = getActiveSeedSlot($now);
-
-    if (claimSeedWinner($activeSlot, $participantId)) {
-        return true;
-    }
-
-    $nextSlot = $activeSlot->modify('+1 hour');
-    $minutesToNextSeed = max(0, ($nextSlot->getTimestamp() - $now->getTimestamp()) / 60);
-
-    if ($minutesToNextSeed > PRESEED_WINDOW_MINUTES) {
-        return false;
-    }
-
-    $progress = 1 - ($minutesToNextSeed / PRESEED_WINDOW_MINUTES);
-    $probability = 0.10 + ($progress * 0.55);
-
-    return randomChance($probability);
+    return evaluateButton($participantId, 4);
 }
 
 function saveQuestionResults(int $participantId, array $answers, bool $passed): void
 {
     $statement = db()->prepare(
-        'UPDATE participantes
-         SET respuestas_json = :respuestas_json, preguntas_aprobadas = :preguntas_aprobadas, respondido_en = NOW()
+        'UPDATE participacion
+         SET respuestas_json = :respuestas_json, preguntas_aprobadas = :preguntas_aprobadas, fecha_respondio = NOW()
          WHERE id = :id'
     );
 
@@ -307,4 +428,66 @@ function finalResult(array $participant): string
     }
 
     return 'lose';
+}
+
+function getUserByEmail(string $email): ?array
+{
+    $statement = db()->prepare('SELECT * FROM usuarios WHERE email = :email LIMIT 1');
+    $statement->execute(['email' => $email]);
+    $user = $statement->fetch();
+
+    return $user ?: null;
+}
+
+function getUserByDni(string $dni): ?array
+{
+    $statement = db()->prepare('SELECT * FROM usuarios WHERE dni = :dni LIMIT 1');
+    $statement->execute(['dni' => $dni]);
+    $user = $statement->fetch();
+
+    return $user ?: null;
+}
+
+function getTodayParticipationByUserId(int $userId): ?array
+{
+    $statement = db()->prepare(
+        'SELECT *
+         FROM participacion
+         WHERE usuario_id = :usuario_id AND fecha_participacion = CURDATE()
+         LIMIT 1'
+    );
+    $statement->execute(['usuario_id' => $userId]);
+    $participation = $statement->fetch();
+
+    return $participation ?: null;
+}
+
+function createParticipation(int $userId): int
+{
+    $statement = db()->prepare(
+        'INSERT INTO participacion (usuario_id, gano_juego, fecha_participacion)
+         VALUES (:usuario_id, 0, CURDATE())'
+    );
+    $statement->execute(['usuario_id' => $userId]);
+
+    return (int) db()->lastInsertId();
+}
+
+function loginUserForToday(int $userId): int
+{
+    $todayParticipation = getTodayParticipationByUserId($userId);
+    if ($todayParticipation !== null) {
+        return (int) $todayParticipation['id'];
+    }
+
+    try {
+        return createParticipation($userId);
+    } catch (PDOException $exception) {
+        $todayParticipation = getTodayParticipationByUserId($userId);
+        if ($todayParticipation !== null) {
+            return (int) $todayParticipation['id'];
+        }
+
+        throw $exception;
+    }
 }

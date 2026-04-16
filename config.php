@@ -22,26 +22,26 @@ const BUTTON_SUCCESS_RATES = [
 ];
 const QUESTIONS = [
     'q1' => [
-        'label' => '¿Cuál es el punto ideal para servir un asado clásico?',
+        'label' => 'En el futbol, ¿cual es el unico jugador que puede tocar la pelota con las manos?',
         'options' => [
-            'a' => 'Cuando la carne está dorada por fuera y jugosa por dentro.',
-            'b' => 'Cuando toda la carne queda completamente seca.',
+            'a' => 'El arquero',
+            'b' => 'El delantero',
         ],
         'correct' => 'a',
     ],
     'q2' => [
-        'label' => '¿Qué conviene hacer antes de prender el fuego?',
+        'label' => 'En el futbol, ¿de que color es la tarjeta que saca el arbitro para expulsar a un jugador?',
         'options' => [
-            'a' => 'Improvisar sin revisar nada.',
-            'b' => 'Tener listos carbón, utensilios y cortes.',
+            'a' => 'Roja',
+            'b' => 'Violeta',
         ],
-        'correct' => 'b',
+        'correct' => 'a',
     ],
     'q3' => [
-        'label' => '¿Cuál es una buena práctica para una promo responsable?',
+        'label' => 'En el futbol, ¿cuanto tiempo dura un partido de futbol 11 normal?',
         'options' => [
-            'a' => 'Leer bases y condiciones antes de participar.',
-            'b' => 'Participar con datos de terceros.',
+            'a' => '90 minutos',
+            'b' => '20 minutos',
         ],
         'correct' => 'a',
     ],

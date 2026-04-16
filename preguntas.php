@@ -49,10 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require_once __DIR__ . '/includes/header.php';
 ?>
-<section class="content-card narrow-card">
-    <span class="eyebrow">Paso 4</span>
-    <h1>Preguntas</h1>
-    <p class="lead">Solo llegás a esta instancia si el juego fue ganador. Respondé correctamente las tres preguntas para confirmar el premio.</p>
+<section class="content-card mecanica-card preguntas-card">
+    <img src="img/promo-arma.png" alt="Promo Arma tu Asado" class="arma-img" />
+    
+    
+    <h2>¡Excelente, sos un potencial ganador!</h2>
+    <p class="meca-intro">Sólo un pasito más, respondé correctamente estas preguntas:</p>
 
     <?php if ($errors): ?>
         <div class="flash flash-error"><?= esc(implode(' ', $errors)) ?></div>
@@ -61,9 +63,9 @@ require_once __DIR__ . '/includes/header.php';
     <form method="post" class="question-list">
         <?php foreach ($questions as $key => $question): ?>
             <fieldset class="question-card">
-                <legend><?= esc($question['label']) ?></legend>
+                <legend class="question-title"><?= esc($question['label']) ?></legend>
                 <?php foreach ($question['options'] as $optionKey => $label): ?>
-                    <label class="option-row">
+                    <label class="option-row checkbox-row">
                         <input type="radio" name="<?= esc($key) ?>" value="<?= esc($optionKey) ?>" <?= (($_POST[$key] ?? '') === $optionKey) ? 'checked' : '' ?>>
                         <span><?= esc($label) ?></span>
                     </label>
@@ -72,7 +74,7 @@ require_once __DIR__ . '/includes/header.php';
         <?php endforeach; ?>
 
         <div class="actions-row">
-            <button class="button button-primary" type="submit">Enviar respuestas</button>
+            <button class="btn" type="submit">Responder</button>
         </div>
     </form>
 </section>

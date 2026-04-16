@@ -160,7 +160,7 @@ body {
 	text-align: center;
 }
 
-.mecanica-card .actions-row {
+.mecanica-card .actions-row, .registro-card .actions-row, .preguntas-card .actions-row {
 	display: flex;
 	justify-content: center;
 }
@@ -240,7 +240,7 @@ body {
 	cursor: pointer;
 }
 
-.registro-card, .mecanica-card {
+.registro-card, .mecanica-card, .juego-card {
 	padding-bottom: 2vh;
 }
 
@@ -314,6 +314,68 @@ body {
 	background: radial-gradient(circle, #f9da0d 0 42%, #000 43% 100%);
 }
 
+.preguntas-card {
+	padding-bottom: 2vh;
+}
+
+.question-list {
+	max-width: 90%;
+	margin: 0 auto;
+}
+
+.question-card {
+	margin: 0 0 1.5rem;
+	padding: 0;
+	border: 0;
+}
+
+.question-title {
+	margin: 0 0 0.75rem;
+	color: #fff;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	font-size: 1.75rem;
+	text-align: left;
+	width: min(100%, 28rem);
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.question-card .option-row {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.75rem;
+	margin: 0.75rem 0;
+	text-align: left;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	color: #fff;
+	font-size: 1.5rem;
+	cursor: pointer;
+	width: min(100%, 28rem);
+	margin-left: auto;
+	margin-right: auto;
+    width: 150px;
+}
+
+.question-card .option-row input[type="radio"] {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 1.4rem;
+	height: 1.4rem;
+	border-radius: 50%;
+	background: #000;
+	border: 2px solid #f9da0d;
+	cursor: pointer;
+	flex: 0 0 auto;
+	position: relative;
+	margin: 0;
+}
+
+.question-card .option-row input[type="radio"]:checked {
+	background: radial-gradient(circle, #f9da0d 0 42%, #000 43% 100%);
+}
+
 #cancha {
 	width: 100%;
 	max-width: 90%;
@@ -360,10 +422,30 @@ body {
 	background: #fff;
 	border: 0.5vh solid #000;
 	margin-top: 0.25rem;
+	opacity: 0.6;
+}
+
+#cancha .patea .jugador .circulo {
+	opacity: 1;
 }
 
 #cancha .jugador .circulo.activo {
 	background: #fff url("img/pelota.png") center center / 100% 100% no-repeat;
+	opacity: 1;
+}
+
+#cancha .jugador .circulo.cargando {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+#cancha .jugador .circulo.error {
+	background: #d71920;
+}
+
+#cancha .jugador .circulo.bloqueado {
+	opacity: 0.5;
+	pointer-events: none;
 }
 
 #cancha .jugador.arquero,
@@ -383,4 +465,104 @@ body {
 	background: rgba(0, 0, 0, 0.55);
 	border: 0.5vh solid #fed12d;
 	border-radius: 30px;
+}
+
+.juego-card h2 {
+	color: #fff;
+	text-align: center;
+	font-size: 2rem;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	margin-bottom: 0;
+}
+
+.juego-card p {
+	color: #fca559;
+	text-align: center;
+	font-size: 1.6rem;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	margin-top: 0;
+    max-width: 400px;
+	margin-left: auto;
+	margin-right: auto;
+
+}
+
+.cierre-card {
+	padding-bottom: 2vh;
+}
+
+.cierre-card .actions-row {
+	display: flex;
+	justify-content: center;
+}
+
+.gano-img {
+	display: block;
+	max-width: 70%;
+	height: auto;
+	margin: 1rem auto;
+}
+
+.cierre-card.result-win h2 {
+	color: #fff;
+	font-size: 3rem;
+	text-align: center;
+	margin-bottom: 0;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+}
+
+.cierre-card.result-win p {
+	color: #fca559;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	font-size: 1.75rem;
+	max-width: 85%;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 0;
+	text-align: center;
+}
+
+.perdio-wrap {
+	position: relative;
+	max-width: 100%;
+	margin: 1rem auto 0;
+	padding-top: 5rem;
+}
+
+.perdio-img {
+	display: block;
+	max-width: 70%;
+	height: auto;
+	margin: 0 auto;
+	position: relative;
+	z-index: 2;
+}
+
+#prdbox {
+	background: rgba(0, 0, 0, 0.6);
+	padding: 5.5rem 1.25rem 2rem;
+	margin-top: -5rem;
+	margin-bottom: 2rem;
+	position: relative;
+	z-index: 1;
+	text-align: center;
+}
+
+#prdbox h2 {
+	margin: 0;
+	color: #ff766b;
+	font-size: 3rem;
+	text-align: center;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+}
+
+#prdbox p {
+	margin: 0.75rem 0 0;
+	color: #fff;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	font-size: 1.75rem;
+	max-width: 85%;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
 }

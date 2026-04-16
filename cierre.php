@@ -19,28 +19,31 @@ $result = finalResult($participant);
 
 require_once __DIR__ . '/includes/header.php';
 ?>
-<section class="content-card narrow-card <?= $result === 'win' ? 'result-win' : 'result-lose' ?>">
-    <span class="eyebrow">Paso 5</span>
-    <h1><?= $result === 'win' ? 'Ganaste' : 'Perdiste' ?></h1>
-    <p class="lead">
-        <?php if ($result === 'win'): ?>
-            Cumpliste con los cuatro botones y respondiste correctamente las tres preguntas.
-        <?php elseif ((int) $participant['gano_juego'] === 1): ?>
-            El juego fue ganador, pero las respuestas no alcanzaron para validar el premio final.
-        <?php else: ?>
-            No se completó una combinación ganadora en el juego.
-        <?php endif; ?>
-    </p>
-
-    <div class="summary-box">
-        <p><strong>Participante:</strong> <?= esc($participant['nombre'] . ' ' . $participant['apellido']) ?></p>
-        <p><strong>Email:</strong> <?= esc($participant['email']) ?></p>
-        <p><strong>Estado del juego:</strong> <?= (int) $participant['gano_juego'] === 1 ? 'Ganador' : 'Perdedor' ?></p>
-        <p><strong>Estado final:</strong> <?= $result === 'win' ? 'Premio confirmado' : 'Sin premio' ?></p>
-    </div>
-
-    <div class="actions-row">
-        <a class="button button-primary" href="index.php">Volver al home</a>
+<section class="content-card cierre-card <?= $result === 'win' ? 'result-win' : 'result-lose' ?>">
+    <img src="img/promo-arma.png" alt="Promo Arma tu Asado" class="arma-img" />
+    <?php if ($result === 'win'): ?>
+        <img src="img/camiseta.png" alt="Interceptaron tu pase" class="gano-img" />
+        <h2>¡CORRECTO! <br/>GANASTE UNA CAMISETA!</h2>
+        <p>En unos días nos pondremos en contacto con vos para entregarte tu premio. Gracias por participar.</p>
+    <?php elseif ((int) $participant['gano_juego'] === 1): ?>
+        <div class="perdio-wrap">
+            <img src="img/perdio.png" alt="Interceptaron tu pase" class="perdio-img" />
+            <div id="prdbox">
+                <h2>Uhh, lo siento!<br/>Interceptaron tu pase.</h2>
+                <p>Pero no te preocupes,<br>podés seguir participando mañana.</p>
+            </div>
+        </div>
+    <?php else: ?>
+        <div class="perdio-wrap">
+            <img src="img/perdio.png" alt="Interceptaron tu pase" class="perdio-img" />
+            <div id="prdbox">
+                <h2>Uhh, lo siento!<br/>Interceptaron tu pase.</h2>
+                <p>Pero no te preocupes,<br>podés seguir participando mañana.</p>
+            </div>
+        </div>
+    <?php endif; ?>    
+    <div class="full-width actions-row">
+        <a class="btn" href="index">Finalizar</a>
     </div>
 </section>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

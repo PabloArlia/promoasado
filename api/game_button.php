@@ -29,51 +29,71 @@ try {
     }
 
     $payload = json_decode(file_get_contents('php://input') ?: '{}', true, 512, JSON_THROW_ON_ERROR);
-    $button = (int) ($payload['button'] ?? 0);
+    $combined      = (int) ($payload['button'] ?? 0);
+    $buttonNumber  = intdiv($combined, 10);
+    $sentPosition  = $combined % 10;
 
-    if (!in_array($button, [1, 2, 3, 4], true)) {
+    $validPositions = [1 => 4, 2 => 3, 3 => 3, 4 => 2];
+
+    if (!isset($validPositions[$buttonNumber]) || $sentPosition < 1 || $sentPosition > $validPositions[$buttonNumber]) {
         http_response_code(422);
         echo json_encode([
             'success' => false,
-            'message' => 'Botón inválido.',
+            'message' => 'Botón o posición inválidos.',
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     $statuses = getButtonStatuses($participantId);
-    if ($statuses[$button] !== null) {
+
+    for ($requiredButton = 1; $requiredButton < $buttonNumber; $requiredButton++) {
+        if ($statuses[$requiredButton] === null) {
+            http_response_code(409);
+            echo json_encode([
+                'success' => false,
+                'message' => sprintf('Primero tenés que jugar el botón %d.', $requiredButton),
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+    }
+
+    if ($statuses[$buttonNumber] !== null) {
         $latestParticipant = getParticipant($participantId) ?? $participant;
         $completed = isGameComplete($participantId);
+        $prevResult = $statuses[$buttonNumber];
+        $returnedPos = $prevResult ? $sentPosition : otherPosition($buttonNumber, $sentPosition);
 
         echo json_encode([
-            'success' => true,
-            'result' => $statuses[$button],
-            'message' => 'Ese botón ya había sido jugado.',
+            'success'   => true,
+            'result'    => $prevResult,
+            'linea'     => $buttonNumber,
+            'pos'       => $returnedPos,
+            'message'   => 'Ese botón ya había sido jugado.',
             'completed' => $completed,
-            'redirect' => $completed
+            'redirect'  => $completed
                 ? ((int) $latestParticipant['gano_juego'] === 1 ? 'preguntas.php' : 'cierre.php')
                 : null,
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    $result = $button === 4
-        ? evaluateLastButton($participantId)
-        : randomChance(BUTTON_SUCCESS_RATES[$button]);
+    $result = evaluateButton($participantId, $buttonNumber);
+    $returnedPos = $result ? $sentPosition : otherPosition($buttonNumber, $sentPosition);
 
-    recordButtonResult($participantId, $button, $result);
+    recordButtonResult($participantId, $buttonNumber, $result);
     $game = finalizeGame($participantId);
 
     echo json_encode([
-        'success' => true,
-        'result' => $result,
-        'message' => $result
+        'success'   => true,
+        'result'    => $result,
+        'pos'       => $returnedPos,
+        'message'   => $result
             ? 'El webservice respondió TRUE para este botón.'
             : 'El webservice respondió FALSE para este botón.',
         'completed' => $game['completed'],
-        'won' => $game['won'],
-        'redirect' => $game['completed'] ? ($game['won'] ? 'preguntas.php' : 'cierre.php') : null,
-        'statuses' => $game['statuses'],
+        'won'       => $game['won'],
+        'redirect'  => $game['completed'] ? ($game['won'] ? 'preguntas.php' : 'cierre.php') : null,
+        'statuses'  => $game['statuses'],
     ], JSON_UNESCAPED_UNICODE);
 } catch (JsonException $exception) {
     http_response_code(400);
