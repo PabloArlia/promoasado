@@ -1,0 +1,386 @@
+@font-face {
+	font-family: "DollopSerifExpanded";
+	src: url("fonts/DollopSerif-Expanded.woff2") format("woff2"),
+		url("fonts/DollopSerif-Expanded.woff") format("woff");
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "DollopSerifCondensed";
+	src: url("fonts/DollopSerif-Condensed.woff2") format("woff2"),
+		url("fonts/DollopSerif-Condensed.woff") format("woff");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	min-height: 100%;
+}
+
+body {
+	background: #000;
+	color: #111;
+	font-family: "DollopSerifExpanded", Arial, sans-serif;
+	font-synthesis: none;
+}
+
+.container {
+	width: 100%;
+	max-width: 500px;
+	margin: 0 auto;
+}
+
+.header {
+	background: #000;
+}
+
+.header .container {
+	padding-top: 2vh;
+	padding-bottom: 2vh;
+	padding-left: 2vh;
+	padding-right: 2vh;
+}
+
+.header-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+}
+
+.header-top img {
+	display: block;
+	max-width: 35%;
+	height: auto;
+}
+
+.page {
+	background: #000;
+}
+
+.page .container {
+	padding-top: 2vh;
+	background: url("img/fondo.png") top center / 100% auto no-repeat;
+}
+
+.site-footer {
+	background: #000;
+	color: #fca559;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+}
+
+.site-footer .container {
+	padding-top: 2vh;
+	padding-bottom: 2vh;
+	padding-left: 2vh;
+	padding-right: 2vh;
+}
+
+.footer-shell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+}
+
+.site-footer p a:link,
+.site-footer p a:visited,
+.site-footer p a:hover,
+.site-footer p a:active {
+	color: inherit;
+	text-decoration: none;
+}
+
+.footer-logo {
+	max-width: 24%;
+	height: auto;
+	display: block;
+	flex: 0 0 auto;
+}
+
+.footer-shell p {
+	margin: 0;
+	color: #fdb574;
+	font-size: 0.9rem;
+	line-height: 1.4;
+}
+
+.card-intro {
+	color: #fff;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	font-size: 1.75rem;
+	max-width: 85%;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.mecanica-card h2 {
+	color: #fff;
+	font-size: 3rem;
+	text-align: center;
+	margin-bottom: 0;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+}
+.poreview-img {
+	max-width: 70%;
+	height: auto;
+	display: block;
+	margin:1rem auto
+}
+.meca-intro {
+	color: #fca559;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	font-size: 1.75rem;
+	max-width: 85%;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 0;
+	text-align: center;
+}
+
+.mecanica-card .actions-row {
+	display: flex;
+	justify-content: center;
+}
+
+.home-stack {
+	display: grid;
+	justify-items: center;
+	gap: 2vh;
+}
+
+.arma-img {
+	max-width: 70%;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+.tronco-img {
+	max-width: 90%;
+}
+
+.arma-img,
+.tronco-img {
+	height: auto;
+	display: block;
+}
+
+.tronco-wrap {
+	position: relative;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+.sobretronco {
+	position: absolute;
+	top: 65%;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, .7) 0%, rgba(0, 0, 0, .95) 60%, rgba(0, 0, 0, 1) 100%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding-top: 2vh;
+	padding-bottom: 2vh;
+	padding-left: 2vh;
+	padding-right: 2vh;
+}
+
+.sobretronco h2 {
+    margin: 0;
+    padding-bottom: 1rem;
+    color: #fca559;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.25rem 3rem;
+	background-color: #432011;
+	color: #fca559;
+	border: 3px solid #f9da0d;
+	border-radius: 100vh;
+	text-decoration: none;
+	font-weight: 700;
+	font-size: 1.75rem;
+	margin: 0 auto;
+	font-family: "DollopSerifExpanded";
+	cursor: pointer;
+}
+
+.registro-card, .mecanica-card {
+	padding-bottom: 2vh;
+}
+
+.form-grid input[type="text"],
+.form-grid input[type="email"],
+.form-grid input[type="tel"] {
+	width: 100%;
+	background: #000;
+	color: #fbf0a2;
+	border: 0.4vh solid #f9da0d;
+	border-radius: 100vh;
+	font-size: 1.5rem;
+	padding: 0.5rem 1.25rem;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	text-align: center;
+	outline: none;
+}
+
+.form-grid input.input-error {
+	border-color: #d71920;
+}
+
+.form-grid input[type="text"]::placeholder,
+.form-grid input[type="email"]::placeholder,
+.form-grid input[type="tel"]::placeholder {
+	color: rgba(251, 240, 162, 0.65);
+}
+
+.form-grid label {
+	display: block;
+	margin: 1rem;
+}
+
+.form-grid label.checkbox-row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	text-align: center;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	color: #fca559;
+	font-size: 1.2rem;
+}
+
+.checkbox-row span {
+	color: inherit;
+}
+
+.checkbox-row a {
+	color: inherit;
+}
+
+.checkbox-row input[type="checkbox"] {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 1.4rem;
+	height: 1.4rem;
+	border-radius: 50%;
+	background: #000;
+	border: 2px solid #f9da0d;
+	cursor: pointer;
+	flex: 0 0 auto;
+	position: relative;
+}
+
+.checkbox-row input[type="checkbox"].input-error {
+	border-color: #d71920;
+}
+
+.checkbox-row input[type="checkbox"]:checked {
+	background: radial-gradient(circle, #f9da0d 0 42%, #000 43% 100%);
+}
+
+#cancha {
+	width: 100%;
+	max-width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	aspect-ratio: 1148 / 1709;
+	background-image: url("img/cancha.png");
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+}
+
+#cancha .linea {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+    padding: 2%;
+    width: 80%;
+	border: 0.5vh solid transparent;
+}
+
+#cancha .jugador {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#cancha .jugador img {
+	display: block;
+	max-width: 64px;
+	height: auto;
+}
+
+#cancha .jugador .circulo {
+	display: block;
+	width: 35px;
+	height: 35px;
+	aspect-ratio: 1 / 1;
+	border-radius: 50%;
+	background: #fff;
+	border: 0.5vh solid #000;
+	margin-top: 0.25rem;
+}
+
+#cancha .jugador .circulo.activo {
+	background: #fff url("img/pelota.png") center center / 100% 100% no-repeat;
+}
+
+#cancha .jugador.arquero,
+#cancha .jugador.arquero-malo {
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 0.3rem;
+}
+
+#cancha .jugador.arquero .circulo,
+#cancha .jugador.arquero-malo .circulo {
+	margin-top: 0;
+}
+
+#cancha .linea.patea {
+	background: rgba(0, 0, 0, 0.55);
+	border: 0.5vh solid #fed12d;
+	border-radius: 30px;
+}
