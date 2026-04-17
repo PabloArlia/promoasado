@@ -363,12 +363,16 @@ function evaluateButton(int $participantId, int $buttonNumber): bool
     }
 
     $secondsLeft = secondsUntilNextSeed();
-    return match ($buttonNumber) {
-        1 => $secondsLeft < 60  || randomChance(0.60),
-        2 => $secondsLeft < 20  || randomChance(0.40),
-        3 => $secondsLeft < 10  || randomChance(0.10),
-        default => false,
-    };
+    switch ($buttonNumber) {
+        case 1:
+            return $secondsLeft < 60 || randomChance(0.60);
+        case 2:
+            return $secondsLeft < 20 || randomChance(0.40);
+        case 3:
+            return $secondsLeft < 10 || randomChance(0.10);
+        default:
+            return false;
+    }
 }
 
 function otherPosition(int $buttonNumber, int $sentPosition): int

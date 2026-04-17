@@ -180,13 +180,15 @@ include 'header.php';
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end">
-                                    <a href="bares.php?edit=<?= (int)$b['id'] ?><?= $filterCadena ? '&cadena='.$filterCadena : '' ?>"
-                                       class="btn btn-sm btn-outline-secondary me-1">Editar</a>
-                                    <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este bar?')">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="id" value="<?= (int)$b['id'] ?>">
-                                        <button class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                    </form>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="bares.php?edit=<?= (int)$b['id'] ?><?= $filterCadena ? '&cadena='.$filterCadena : '' ?>"
+                                           class="btn btn-outline-secondary">Editar</a>
+                                        <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este bar?')">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?= (int)$b['id'] ?>">
+                                            <button class="btn btn-outline-danger">Eliminar</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; endif; ?>
@@ -211,7 +213,7 @@ include 'header.php';
                 <?php endif; ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><?= $editing ? 'Editar bar' : 'Nuevo bar' ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <a href="bares.php<?= $filterCadena ? '?cadena='.$filterCadena : '' ?>" class="btn-close"></a>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -234,8 +236,13 @@ include 'header.php';
                     </div>
                     <div class="mb-3">
                         <label class="form-label required">Dirección</label>
-                        <input type="text" name="direccion" class="form-control"
-                               value="<?= htmlspecialchars($editing['direccion'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
+                        <div class="input-group">
+                            <input type="text" name="direccion" id="direccionInput" class="form-control"
+                                   value="<?= htmlspecialchars($editing['direccion'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
+                            <button type="button" class="btn btn-outline-secondary" id="btnGeocodeDir" title="Obtener coordenadas desde dirección">
+                                📍 Ubicar
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Horario</label>
@@ -245,14 +252,17 @@ include 'header.php';
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label">Latitud</label>
-                            <input type="number" name="latitud" step="any" class="form-control"
+                            <input type="number" name="latitud" id="latitudInput" step="any" class="form-control"
                                    value="<?= htmlspecialchars($editing['latitud'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label">Longitud</label>
-                            <input type="number" name="longitud" step="any" class="form-control"
+                            <input type="number" name="longitud" id="longitudInput" step="any" class="form-control"
                                    value="<?= htmlspecialchars($editing['longitud'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         </div>
+                    </div>
+                    <div id="mapContainer" style="display: none;" class="mb-3">
+                        <div id="mapBar" style="height: 200px; border-radius: 4px; border: 1px solid #444;"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -266,5 +276,98 @@ include 'header.php';
 <?php if ($editing): ?>
 <div class="modal-backdrop fade show"></div>
 <?php endif; ?>
+
+<script>
+let mapBar = null;
+let markerBar = null;
+
+function initMapBar(lat, lon) {
+    const container = document.getElementById('mapBar');
+    
+    if (mapBar) {
+        mapBar.off();
+        mapBar.remove();
+    }
+    
+    mapBar = L.map('mapBar').setView([lat, lon], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(mapBar);
+    
+    if (markerBar) markerBar.remove();
+    markerBar = L.marker([lat, lon]).addTo(mapBar);
+    
+    document.getElementById('mapContainer').style.display = 'block';
+    
+    // Redimensionar el mapa después de un pequeño delay
+    setTimeout(() => mapBar.invalidateSize(), 100);
+}
+
+function updateMapFromInputs() {
+    const lat = parseFloat(document.getElementById('latitudInput').value);
+    const lon = parseFloat(document.getElementById('longitudInput').value);
+    
+    if (!isNaN(lat) && !isNaN(lon)) {
+        initMapBar(lat, lon);
+    } else {
+        document.getElementById('mapContainer').style.display = 'none';
+    }
+}
+
+// Geocodificar dirección usando Nominatim de OpenStreetMap
+document.getElementById('btnGeocodeDir').addEventListener('click', async function() {
+    const direccion = document.getElementById('direccionInput').value.trim();
+    const cadenaSelect = document.querySelector('[name="cadena_id"]');
+    const cadenaId = cadenaSelect ? cadenaSelect.value : '';
+    
+    if (!direccion) {
+        alert('Por favor ingresa una dirección');
+        return;
+    }
+    
+    this.disabled = true;
+    this.textContent = '⏳ Buscando...';
+    
+    try {
+        // Nominatim API (OpenStreetMap)
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}&limit=1`);
+        const results = await response.json();
+        
+        if (results && results.length > 0) {
+            const lat = results[0].lat;
+            const lon = results[0].lon;
+            
+            document.getElementById('latitudInput').value = lat;
+            document.getElementById('longitudInput').value = lon;
+            
+            initMapBar(lat, lon);
+            this.textContent = '✓ ¡Encontrado!';
+            setTimeout(() => {
+                this.textContent = '📍 Ubicar';
+                this.disabled = false;
+            }, 2000);
+        } else {
+            alert('No se encontró la dirección. Verifica que sea correcta.');
+            this.textContent = '📍 Ubicar';
+            this.disabled = false;
+        }
+    } catch (err) {
+        console.error('Error al geocodificar:', err);
+        alert('Error al buscar la dirección');
+        this.textContent = '📍 Ubicar';
+        this.disabled = false;
+    }
+});
+
+// Mostrar mapa si ya tiene coordenadas al abrir el modal
+document.addEventListener('DOMContentLoaded', function() {
+    updateMapFromInputs();
+    
+    // Actualizar mapa cuando cambien las coordenadas manualmente
+    document.getElementById('latitudInput').addEventListener('change', updateMapFromInputs);
+    document.getElementById('longitudInput').addEventListener('change', updateMapFromInputs);
+});
+</script>
 
 <?php include 'footer.php'; ?>
