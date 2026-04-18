@@ -411,6 +411,8 @@ body {
 	display: block;
 	max-width: 64px;
 	height: auto;
+    max-height: 16vw;
+
 }
 
 #cancha .jugador .circulo {
