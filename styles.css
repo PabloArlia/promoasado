@@ -81,7 +81,7 @@ body {
 
 .page .container {
 	padding-top: 2vh;
-	background: url("img/fondo.png") top center / 100% auto no-repeat;
+	background: url("img/fondo.png") top center / 100% auto no-repeat,url("img/fondotile.jpg") top center / 100% auto repeat;
 }
 
 .site-footer {
