@@ -90,7 +90,19 @@ if ($filterCadena) {
         ORDER BY c.nombre ASC, b.nombre ASC
     ");
 }
-$bares = $st->fetchAll();
+$allBares = $st->fetchAll();
+
+// Separar bares incompletos (sin lat/lon) de los completos
+$baresIncompletos = [];
+$baresCompletos = [];
+foreach ($allBares as $b) {
+    if (!$b['latitud'] || !$b['longitud']) {
+        $baresIncompletos[] = $b;
+    } else {
+        $baresCompletos[] = $b;
+    }
+}
+$bares = array_merge($baresIncompletos, $baresCompletos);
 
 // Cadena activa para el filtro
 $cadenaActiva = null;
@@ -145,6 +157,7 @@ include 'header.php';
             <?php endforeach; ?></ul>
         </div>
         <?php endif; ?>
+
 
         <div class="card">
             <div class="card-body p-0">

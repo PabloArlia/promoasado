@@ -2,9 +2,9 @@
 
 ## Features faltantes
 
-- [ ] Url cadena
-- [ ] Geolocalizacion
+- [X] Geolocalizacion
 - [ ] Premios sembrados
 - [ ] Estadísticas
+- [ ] APrticipaciones
 - [ ] url friendy 
 

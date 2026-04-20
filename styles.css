@@ -136,6 +136,19 @@ body {
 	text-align: center;
 }
 
+.permission-info {
+	color: #fff;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	font-size: 0.85rem;
+	margin-top: 0.5rem;
+	padding: 0 1rem;
+	text-align: left;
+}
+
+.permission-info p {
+	margin: 0.3rem 0;
+}
+
 .mecanica-card h2 {
 	color: #fff;
 	font-size: 3rem;
@@ -306,7 +319,7 @@ body {
 	position: relative;
 }
 
-.checkbox-row input[type="checkbox"].input-error {
+.checkbox-row input[type="checkbox"].input-error, .btn.input-error {
 	border-color: #d71920;
 }
 

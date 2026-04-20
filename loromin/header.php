@@ -1,8 +1,8 @@
 <?php
 if (!isset($title)) {
-  $titlehead = 'Kia';
+  $titlehead = 'Promo Asado';
 } else {
-  $titlehead = $title.' - Kia';
+  $titlehead = $title.' - Promo Asado';
 }
 $file = basename($_SERVER["SCRIPT_FILENAME"],'.php');
 ?>

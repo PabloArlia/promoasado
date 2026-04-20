@@ -92,8 +92,9 @@ include 'header.php';
                                 <th>Nombre</th>
                                 <th>Identificador</th>
                                 <th style="width:240px">Logo</th>
-                                <th style="width:110px">Bares</th>
-                                <th style="width:165px"></th>
+                                <th>Bares</th>
+                                <th>Enlace</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -114,6 +115,7 @@ include 'header.php';
                                 </div>
                             </td>
                             <td><a href="bares.php?cadena=<?= (int)$c['id'] ?>" class="btn btn-ghost-secondary">Ver bares</a></td>
+                            <td><a href="../?<?= htmlspecialchars($c['identificador'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-ghost-primary" target="_blank">Acceder</a></td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-primary btn-save">&#10003; Guardar</button>
@@ -133,7 +135,8 @@ include 'header.php';
                                 </div>
                             </td>
                             <td></td>
-                            <td>
+                            <td></td>
+                            <td></td>
                                 <button class="btn btn-primary btn-save">+ Agregar</button>
                             </td>
                         </tr>
@@ -184,6 +187,7 @@ document.addEventListener('click', function(e) {
                     row.dataset.id = data.id;
                     row.cells[0].textContent = data.id;
                     row.cells[4].innerHTML = '<a href="bares.php?cadena=' + data.id + '" class="btn btn-ghost-secondary">Ver bares</a>';
+                    row.cells[5].innerHTML = '<a href="../index.php?' + ident + '" class="btn btn-ghost-primary" target="_blank">Acceder</a>';
                     var nr = document.getElementById('row-new');
                     if (nr) { nr.querySelector('.f-nombre').value=''; nr.querySelector('.f-identificador').value=''; var nf=nr.querySelector('.f-logo-file'); if(nf) nf.value=''; }
                 }

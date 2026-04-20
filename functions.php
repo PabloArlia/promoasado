@@ -1,6 +1,23 @@
 <?php
 declare(strict_types=1);
 
+
+// Guardar cadena en sesión si viene en URL (sobreescribir si existe)
+if (!empty($_SERVER['QUERY_STRING'])) {
+    // Obtener el primer parámetro del query string sin el '='
+    $queryString = $_SERVER['QUERY_STRING'];
+    // Si no tiene '=', es el identificador directo
+    if (strpos($queryString, '=') === false) {
+        $_SESSION['cadena'] = (string) $queryString;
+    }
+}
+
+// Si no hay cadena, redirigir a error (excepto si ya estamos en error_cadena)
+if (!isset($_SESSION['cadena']) && basename($_SERVER['SCRIPT_FILENAME']) !== 'error_cadena.php') {
+    header('Location: error_cadena.php');
+    exit;
+}
+
 function redirect(string $path): never
 {
     header('Location: ' . $path);
@@ -494,4 +511,71 @@ function loginUserForToday(int $userId): int
 
         throw $exception;
     }
+}
+
+// Calcular distancia entre dos puntos geográficos usando fórmula de Haversine (en km)
+function haversineDistance(float $lat1, float $lng1, float $lat2, float $lng2): float
+{
+    $earthRadiusKm = 6371;
+
+    $latFromRad = deg2rad($lat1);
+    $latToRad = deg2rad($lat2);
+    $deltaLat = deg2rad($lat2 - $lat1);
+    $deltaLng = deg2rad($lng2 - $lng1);
+
+    $a = sin($deltaLat / 2) * sin($deltaLat / 2) +
+         sin($deltaLng / 2) * sin($deltaLng / 2) * cos($latFromRad) * cos($latToRad);
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+    return $earthRadiusKm * $c;
+}
+
+// Obtener el bar más cercano de una cadena dado lat/lng del usuario
+function getClosestBar(int $cadenaId, float $latitud, float $longitud): ?array
+{
+    // Primero: usar aproximación pitagórica (como si la tierra fuera plana) para filtrar rápido los 5 más cercanos
+    $sql = 'SELECT id, nombre, latitud, longitud,
+                POWER(latitud - :latitud, 2) + POWER(longitud - :longitud, 2) as aprox_distancia
+         FROM bares
+         WHERE cadena_id = :cadena_id AND latitud IS NOT NULL AND longitud IS NOT NULL
+         ORDER BY aprox_distancia ASC
+         LIMIT 5';
+    
+    $params = [
+        'cadena_id' => $cadenaId,
+        'latitud' => $latitud,
+        'longitud' => $longitud,
+    ];
+    
+    $statement = db()->prepare($sql);
+    $statement->execute($params);
+    $bares = $statement->fetchAll();   
+
+    if (empty($bares)) {
+        return null;
+    }
+
+    // Segundo: calcular distancia exacta con Haversine solo en los 5 candidatos
+    $closestBar = null;
+    $closestDistance = PHP_FLOAT_MAX;
+
+    foreach ($bares as $bar) {
+        $distance = haversineDistance(
+            $latitud,
+            $longitud,
+            (float) $bar['latitud'],
+            (float) $bar['longitud']
+        );
+
+        if ($distance < $closestDistance) {
+            $closestDistance = $distance;
+            $closestBar = [
+                'id' => (int) $bar['id'],
+                'nombre' => $bar['nombre'],
+                'distancia_km' => $closestDistance,
+            ];
+        }
+    }
+
+    return $closestBar;
 }

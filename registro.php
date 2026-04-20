@@ -22,6 +22,7 @@ $fieldErrors = [
     'celular' => '',
     'dni' => '',
     'acepta_bases' => '',
+    'acepta_ubicacion' => '',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -30,9 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $shouldTryLogin = ($values['email'] !== '' || $values['dni'] !== '');
-    $hasExtraData = ($values['nombre'] !== '' || $values['apellido'] !== '' || $values['celular'] !== '');
+    $hasExtraData = ($values['nombre'] !== '' || $values['apellido'] !== '' || $values['celular'] !== '') || !$shouldTryLogin;
 
-    if ($shouldTryLogin) {
+    if ($shouldTryLogin && !$hasExtraData) {
         if ($values['email'] !== '' && !filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
             $fieldErrors['email'] = 'Ingresá un email válido.';
             $errors[] = $fieldErrors['email'];
@@ -96,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        if (!$errors && !$hasExtraData) {
+        if (!$errors) {
             if ($values['email'] !== '') {
                 $fieldErrors['email'] = 'No existe un usuario con ese email.';
                 $errors[] = $fieldErrors['email'];
@@ -109,6 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($hasExtraData) {
+        
+        $acepta_ubicacion = isset($_POST['acepta_ubicacion']) && $_POST['acepta_ubicacion'] === '1';
+        if (!$acepta_ubicacion) {
+            $fieldErrors['acepta_ubicacion'] = 'Debes autorizar el acceso a tu ubicación para registrarte.';
+            $errors[] = 'Debes autorizar el acceso a tu ubicación para registrarte.';
+        }
         if ($values['nombre'] === '') {
             $fieldErrors['nombre'] = 'Ingresá el nombre.';
             $errors[] = $fieldErrors['nombre'];
@@ -174,7 +181,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->commit();
 
                 $_SESSION['participante_id'] = $participationId;
-                setFlash('success', 'Registro completo. Ya podés avanzar a la mecánica.');
                 redirect('mecanica');
             } catch (PDOException $exception) {
                 if ($pdo->inTransaction()) {
@@ -219,9 +225,55 @@ require_once __DIR__ . '/includes/header.php';
             <span>ACEPTO <a href="bases-y-condiciones" target="_blank">BASES Y CONDICIONES</a>.</span>
         </label>
 
+        <label class="checkbox-row full-width">
+            <input type="checkbox" name="acepta_ubicacion" id="acepta_ubicacion" value="1" <?= !empty($_POST['acepta_ubicacion']) ? 'checked' : '' ?><?= $fieldErrors['acepta_ubicacion'] !== '' ? ' class="input-error" title="' . esc($fieldErrors['acepta_ubicacion']) . '" aria-invalid="true"' : '' ?>>
+            <span>AUTORIZO EL ACCESO A MI UBICACIÓN.</span>
+        </label>
+
+        <div class="permission-info" id="permission-info-block" style="display: none;">
+            <p><strong>Si bloqueaste el acceso:</strong></p>
+            <p><strong>Android:</strong> Toca el icono de barras (≡) a la izquierda de la barra de dirección → Permisos → Ubicación → Permitir</p>
+            <p><strong>iPhone:</strong> Toca el icono de información (ⓘ) a la izquierda de la barra de dirección → Ubicación → Permitir</p>
+        </div>
+
+        <?php if ($fieldErrors['acepta_ubicacion'] !== ''): ?>
+        <div class="permission-info">
+            <p><strong>Si bloqueaste el acceso:</strong></p>
+            <p><strong>Android:</strong> Toca el icono de barras (≡) a la izquierda de la barra de dirección → Permisos → Ubicación → Permitir</p>
+            <p><strong>iPhone:</strong> Toca el icono de información (ⓘ) a la izquierda de la barra de dirección → Ubicación → Permitir</p>
+        </div>
+        <?php endif; ?>
+
         <div class="full-width actions-row">
-            <button class="btn" type="submit">Jugar</button>
+            <button class="btn" type="submit" id="btn-submit">Jugar</button>
         </div>
     </form>
-</section>
+    
+    <script>
+    const checkboxUbicacion = document.getElementById('acepta_ubicacion');
+    const permissionInfoBlock = document.getElementById('permission-info-block');
+    
+    checkboxUbicacion.addEventListener('change', function() {
+        if (this.checked) {
+            // Solicitar permiso de geolocalización
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Permiso otorgado
+                        permissionInfoBlock.style.display = 'none';
+                        console.log('Ubicación autorizada');
+                    },
+                    function(error) {
+                        // Permiso denegado o error
+                        console.error('Error de geolocalización:', error);
+                        checkboxUbicacion.checked = false;
+                        permissionInfoBlock.style.display = '';
+                    }
+                );
+            }
+        } else {
+            permissionInfoBlock.style.display = 'none';
+        }
+    });
+    </script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

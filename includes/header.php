@@ -11,7 +11,23 @@
     <div class="container">
         <div class="header-top">
             <img src="img/logo-hellmans.png" alt="Hellmans">
-            <img src="img/logo-hormiga.png" alt="Hormiga">
+            <?php            
+            if (isset($_SESSION['cadena'])) {
+                $cadena = $_SESSION['cadena'];
+                
+                $stmt = db()->prepare('SELECT logo FROM cadenas WHERE identificador = :id LIMIT 1');
+                $stmt->execute(['id' => $cadena]);
+                $row = $stmt->fetch();
+                
+                if ($row && $row['logo']) {
+                    echo '<img src="' . esc($row['logo']) . '" alt="' . esc($cadena) . '">';
+                } else {
+                    echo '<img src="img/logo-' . esc($cadena) . '.png" alt="' . esc($cadena) . '">';
+                }
+            } else {
+                echo '&nbsp;';
+            }
+            ?>
         </div>
     </div>
 </header>
