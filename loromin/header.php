@@ -49,16 +49,6 @@ $file = basename($_SERVER["SCRIPT_FILENAME"],'.php');
                         </span>
                       </a>
                     </li>
-                    <li class="nav-item <?=in_array($file,array('juego-config'))?'active':''?>">
-                      <a class="nav-link" href="<?=urladmin?>juego-config.php">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-photo-search"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8h.01" /><path d="M19.5 19.4l-3.8 -3.8" /><path d="M5 19a1 1 0 0 1 -1 -1v-12a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1v7" /><path d="M4 15l4 -4c.928 -.893 2.072 -.893 3 0l4 4" /><path d="M14 14l1 -1c.67 -.644 1.379 -.824 2.06 -.541" /><path d="M18 22a3 3 0 1 0 0 -6a3 3 0 0 0 0 6z" /></svg>
-                        </span>
-                        <span class="nav-link-title">
-                          Juego
-                        </span>
-                      </a>
-                    </li>
                     <li class="nav-item dropdown <?=in_array($file,array('cadenas','bares'))?'active':''?>">
                       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
