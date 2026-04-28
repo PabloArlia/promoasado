@@ -161,13 +161,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->beginTransaction();
 
             try {
-                $statement = $pdo->prepare(
+               $statement = $pdo->prepare(
                     'INSERT INTO usuarios
-                        (nombre, apellido, email, celular, dni, acepta_bases, fecha_registro)
-                     VALUES
-                        (:nombre, :apellido, :email, :celular, :dni, 1, NOW())'
+                        (nombre, apellido, email, email_hash, celular, dni, dni_hash, acepta_bases, fecha_registro)
+                    VALUES
+                        (
+                            AES_ENCRYPT(:nombre, :key1),
+                            AES_ENCRYPT(:apellido, :key2),
+                            AES_ENCRYPT(:email, :key3),
+                            SHA2(:email_hash, 256),
+                            AES_ENCRYPT(:celular, :key4),
+                            AES_ENCRYPT(:dni_enc, :key5),
+                            SHA2(:dni_hash, 256),
+                            1,
+                            NOW()
+                        )'
                 );
-                $statement->execute($values);
+
+                $statement->execute([
+                    ':nombre' => $values['nombre'],
+                    ':apellido' => $values['apellido'],
+                    ':email' => $values['email'],
+                    ':email_hash' => $values['email'],
+                    ':celular' => $values['celular'],
+                    ':dni_enc' => $values['dni'],
+                    ':dni_hash' => $values['dni'],
+                    ':key1' => AES_KEY,
+                    ':key2' => AES_KEY,
+                    ':key3' => AES_KEY,
+                    ':key4' => AES_KEY,
+                    ':key5' => AES_KEY
+                ]);
 
                 $userId = (int) $pdo->lastInsertId();
 
@@ -183,6 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['participante_id'] = $participationId;
                 redirect('mecanica');
             } catch (PDOException $exception) {
+                //echo "Error SQL: " . $e->getMessage();
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
@@ -192,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
+var_dump($errors);
 require_once __DIR__ . '/includes/header.php';
 ?>
 <section class="content-card narrow-card registro-card">

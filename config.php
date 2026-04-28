@@ -12,6 +12,7 @@ const DB_PORT = '3306';
 const DB_NAME = 'promoasado';
 const DB_USER = 'root';
 const DB_PASS = '';
+const AES_KEY = 'promo2026asadorulz12345678901234'; // 32 bytes para AES-256
 const SEED_MINUTE = 45;
 const PRESEED_WINDOW_MINUTES = 20;
 const BUTTON_SUCCESS_RATES = [

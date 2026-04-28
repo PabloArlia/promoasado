@@ -3,8 +3,9 @@
 ## Features faltantes
 
 - [X] Geolocalizacion
-- [ ] Premios sembrados
+- [X] Premios sembrados
+- [X] ENCRYPT AES
 - [ ] Estadísticas
-- [ ] APrticipaciones
+- [ ] Participaciones
 - [ ] url friendy 
 

@@ -46,6 +46,15 @@ function getFlash(): ?array
     return $flash;
 }
 
+function getCadenaIdByIdentificador(string $identificador): ?int
+{
+    $statement = db()->prepare('SELECT id FROM cadenas WHERE identificador = ?');
+    $statement->execute([$identificador]);
+    $result = $statement->fetchColumn();
+
+    return $result !== false ? (int) $result : null;
+}
+
 function regenerateCaptcha(): void
 {
     $characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -97,10 +106,10 @@ function getParticipant(int $participantId): ?array
             p.respuestas_json,
             p.fecha_respondio,
             p.fecha_participacion,
-            u.nombre,
-            u.apellido,
+            AES_DECRYPT(u.nombre, :key1) AS nombre,
+            AES_DECRYPT(u.apellido, :key2) AS apellido,
             u.email,
-            u.celular,
+            AES_DECRYPT(u.celular, :key3) AS celular,
             u.dni,
             u.acepta_bases,
             u.fecha_registro
@@ -109,7 +118,7 @@ function getParticipant(int $participantId): ?array
          WHERE p.id = :id
          LIMIT 1'
     );
-    $statement->execute(['id' => $participantId]);
+    $statement->execute([':key1' => AES_KEY, ':key2' => AES_KEY, ':key3' => AES_KEY, ':id' => $participantId]);
     $participant = $statement->fetch();
 
     return $participant ?: null;
@@ -320,15 +329,16 @@ function claimSeedWinner(int $participantId): bool
     $pdo->beginTransaction();
 
     try {
+        $cadenaId = getCadenaIdByIdentificador($_SESSION['cadena']);
         $select = $pdo->prepare(
             'SELECT id
              FROM semillas_horarias
-             WHERE franja_semilla <= NOW() AND participante_ganador_id IS NULL
+             WHERE franja_semilla <= NOW() AND participante_ganador_id IS NULL AND cadena = :cadena
              ORDER BY franja_semilla ASC
              LIMIT 1
              FOR UPDATE'
         );
-        $select->execute();
+        $select->execute(['cadena' => $cadenaId]);
         $row = $select->fetch();
 
         if (!$row) {
@@ -359,6 +369,19 @@ function claimSeedWinner(int $participantId): bool
     }
 }
 
+function getPrizeWon(int $participantId): ?array
+{
+    $statement = db()->prepare('
+        SELECT p.*
+        FROM semillas_horarias sh
+        JOIN premio p ON sh.premio = p.id
+        WHERE sh.participante_ganador_id = ?
+        LIMIT 1
+    ');
+    $statement->execute([$participantId]);
+    return $statement->fetch() ?: null;
+}
+
 function secondsUntilNextSeed(): int
 {
     $statement = db()->query(
@@ -372,6 +395,7 @@ function secondsUntilNextSeed(): int
 
     return $result !== false ? (int) $result : 3000000;
 }
+
 
 function evaluateButton(int $participantId, int $buttonNumber): bool
 {
@@ -453,19 +477,61 @@ function finalResult(array $participant): string
 
 function getUserByEmail(string $email): ?array
 {
-    $statement = db()->prepare('SELECT * FROM usuarios WHERE email = :email LIMIT 1');
-    $statement->execute(['email' => $email]);
-    $user = $statement->fetch();
+    $statement = db()->prepare(
+        'SELECT
+            id,
+            CAST(AES_DECRYPT(nombre, :key1) AS CHAR) AS nombre,
+            CAST(AES_DECRYPT(apellido, :key2) AS CHAR) AS apellido,
+            CAST(AES_DECRYPT(email, :key3) AS CHAR) AS email,
+            CAST(AES_DECRYPT(celular, :key4) AS CHAR) AS celular,
+            CAST(AES_DECRYPT(dni, :key5) AS CHAR) AS dni,
+            acepta_bases,
+            fecha_registro
+         FROM usuarios
+         WHERE email_hash = :email_hash
+         LIMIT 1'
+    );
 
+    $statement->execute([
+        ':key1' => AES_KEY,
+        ':key2' => AES_KEY,
+        ':key3' => AES_KEY,
+        ':key4' => AES_KEY,
+        ':key5' => AES_KEY,
+        ':email_hash' => hash('sha256', $email)
+    ]);
+
+    $user = $statement->fetch();
     return $user ?: null;
 }
 
 function getUserByDni(string $dni): ?array
 {
-    $statement = db()->prepare('SELECT * FROM usuarios WHERE dni = :dni LIMIT 1');
-    $statement->execute(['dni' => $dni]);
-    $user = $statement->fetch();
+    $statement = db()->prepare(
+        'SELECT
+            id,
+            CAST(AES_DECRYPT(nombre, :key1) AS CHAR) AS nombre,
+            CAST(AES_DECRYPT(apellido, :key2) AS CHAR) AS apellido,
+            CAST(AES_DECRYPT(email, :key3) AS CHAR) AS email,
+            CAST(AES_DECRYPT(celular, :key4) AS CHAR) AS celular,
+            CAST(AES_DECRYPT(dni, :key5) AS CHAR) AS dni,
+            acepta_bases,
+            fecha_registro
+         FROM usuarios
+         WHERE dni_hash = :dni_hash
+         LIMIT 1'
+    );
 
+    $statement->execute([
+        ':key1' => AES_KEY,
+        ':key2' => AES_KEY,
+        ':key3' => AES_KEY,
+        ':key4' => AES_KEY,
+        ':key5' => AES_KEY,
+        ':dni_hash' => hash('sha256', $dni)
+    ]);
+
+    $user = $statement->fetch();
     return $user ?: null;
 }
 
