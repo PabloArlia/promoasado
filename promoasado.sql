@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 28-04-2026 a las 21:43:18
+-- Tiempo de generación: 28-04-2026 a las 22:55:54
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -168,9 +168,7 @@ INSERT INTO `premio` (`id`, `nombre`, `imagen`, `ganaste`) VALUES
 (7, 'Medias Adidas selección Argentina', NULL, 'GANASTE UNAS MEDIAS ADIDAS SELECCIÓN ARGENTINA'),
 (8, 'Pack kit asado (caja + producto Hellmann´s + tarjeta)', NULL, 'GANASTE UN PACK KIT ASADO (CAJA + PRODUCTO HELLMANN´S + TARJETA)');
 
---
--- Índices para tablas volcadas
---
+-- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `semillas_horarias`
@@ -422,7 +420,8 @@ INSERT INTO `semillas_horarias` (`id`, `franja_semilla`, `premio`, `cadena`, `pa
 (269, '2026-06-26 20:15:00', 5, 4, NULL, NULL),
 (270, '2026-06-26 19:40:00', 6, 4, NULL, NULL),
 (271, '2026-06-26 22:05:00', 8, 4, NULL, NULL),
-(272, '2026-06-26 21:40:00', 8, 4, NULL, NULL);
+(272, '2026-06-26 21:40:00', 8, 4, NULL, NULL),
+(273, '2026-04-28 17:00:00', 6, 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -432,11 +431,13 @@ INSERT INTO `semillas_horarias` (`id`, `franja_semilla`, `premio`, `cadena`, `pa
 
 CREATE TABLE `usuarios` (
   `id` int(10) UNSIGNED NOT NULL,
-  `nombre` varchar(255) NOT NULL,
-  `apellido` varchar(255) NOT NULL,
-  `email` varchar(190) NOT NULL,
-  `celular` varchar(255) NOT NULL,
-  `dni` varchar(20) NOT NULL,
+  `nombre` varbinary(255) NOT NULL,
+  `apellido` varbinary(255) NOT NULL,
+  `email` varbinary(255) NOT NULL,
+  `email_hash` char(64) NOT NULL,
+  `celular` varbinary(255) NOT NULL,
+  `dni` varbinary(255) NOT NULL,
+  `dni_hash` char(64) NOT NULL,
   `acepta_bases` tinyint(1) NOT NULL DEFAULT 1,
   `fecha_registro` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -489,8 +490,8 @@ ALTER TABLE `semillas_horarias`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uniq_usuarios_email` (`email`),
-  ADD UNIQUE KEY `uniq_usuarios_dni` (`dni`);
+  ADD UNIQUE KEY `idx_email_hash` (`email_hash`),
+  ADD KEY `idx_dni_hash` (`dni_hash`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -530,7 +531,7 @@ ALTER TABLE `premio`
 -- AUTO_INCREMENT de la tabla `semillas_horarias`
 --
 ALTER TABLE `semillas_horarias`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=273;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=274;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
