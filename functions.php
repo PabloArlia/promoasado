@@ -2,19 +2,26 @@
 declare(strict_types=1);
 
 
-// Guardar cadena en sesión si viene en URL (sobreescribir si existe)
+// Validar y guardar cadena en sesión si viene en URL
 if (!empty($_SERVER['QUERY_STRING'])) {
-    // Obtener el primer parámetro del query string sin el '='
     $queryString = $_SERVER['QUERY_STRING'];
-    // Si no tiene '=', es el identificador directo
+    // Si no tiene '=', es el identificador de la cadena
     if (strpos($queryString, '=') === false) {
-        $_SESSION['cadena'] = (string) $queryString;
+        $identificador = (string) $queryString;
+        // Verificar si la cadena existe en la base de datos
+        if (getCadenaIdByIdentificador($identificador) !== null) {
+            $_SESSION['cadena'] = $identificador;
+        } else {
+            // Si no existe, se limpia para forzar la redirección a error
+            unset($_SESSION['cadena']);
+        }
     }
 }
 
+
 // Si no hay cadena, redirigir a error (excepto si ya estamos en error_cadena)
 if (!isset($_SESSION['cadena']) && basename($_SERVER['SCRIPT_FILENAME']) !== 'error_cadena.php') {
-    header('Location: error_cadena.php');
+    header('Location: error_cadena');
     exit;
 }
 
@@ -149,7 +156,7 @@ function currentParticipant(): ?array
     $statement = db()->prepare(
         'SELECT 1
          FROM participacion
-         WHERE id = :id AND fecha_participacion = CURDATE()
+         WHERE id = :id AND DATE(fecha_participacion) = CURDATE()
          LIMIT 1'
     );
     $statement->execute(['id' => $participantId]);
@@ -540,7 +547,7 @@ function getTodayParticipationByUserId(int $userId): ?array
     $statement = db()->prepare(
         'SELECT *
          FROM participacion
-         WHERE usuario_id = :usuario_id AND fecha_participacion = CURDATE()
+         WHERE usuario_id = :usuario_id AND DATE(fecha_participacion) = CURDATE()
          LIMIT 1'
     );
     $statement->execute(['usuario_id' => $userId]);
@@ -553,7 +560,7 @@ function createParticipation(int $userId): int
 {
     $statement = db()->prepare(
         'INSERT INTO participacion (usuario_id, gano_juego, fecha_participacion)
-         VALUES (:usuario_id, 0, CURDATE())'
+         VALUES (:usuario_id, 0, NOW())'
     );
     $statement->execute(['usuario_id' => $userId]);
 
@@ -612,9 +619,10 @@ function getClosestBar(int $cadenaId, float $latitud, float $longitud): ?array
         'latitud' => $latitud,
         'longitud' => $longitud,
     ];
-    
+
     $statement = db()->prepare($sql);
     $statement->execute($params);
+    
     $bares = $statement->fetchAll();   
 
     if (empty($bares)) {

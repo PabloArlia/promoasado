@@ -6,6 +6,30 @@ if (session_status() === PHP_SESSION_NONE) {
 
 date_default_timezone_set('America/Mexico_City');
 
+// ===== MEDIDAS DE SEGURIDAD HTTP HEADERS =====
+// Prevenir clickjacking
+header('X-Frame-Options: DENY');
+
+// Prevenir MIME-sniffing
+header('X-Content-Type-Options: nosniff');
+
+// Protección contra XSS
+header('X-XSS-Protection: 1; mode=block');
+
+// HSTS (forzar HTTPS) - comentar si no está en HTTPS
+// header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+
+// Content Security Policy - prevenir inyección de scripts
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' cdnjs.cloudflare.com; connect-src 'self'");
+
+// Referrer Policy
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
+// Evitar que el navegador cache datos sensibles
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+
 const APP_NAME = 'Promo Asado';
 const DB_HOST = '127.0.0.1';
 const DB_PORT = '3306';

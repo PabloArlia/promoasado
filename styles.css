@@ -581,3 +581,21 @@ body {
 	margin-right: auto;
 	text-align: center;
 }
+/* Estilos para la página de error de cadena */
+.error-page-section {
+    text-align: center;
+    padding: 80px 20px;
+}
+.error-page-section .arma-img {
+    margin-bottom: 30px;
+}
+.error-page-title {
+    color: #d32f2f;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+.error-page-text {
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 20px;
+}

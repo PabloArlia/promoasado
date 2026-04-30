@@ -29,6 +29,16 @@ $file = basename($_SERVER["SCRIPT_FILENAME"],'.php');
               <div class="row flex-fill align-items-center">
                 <div class="col">
                   <ul class="navbar-nav">
+                    <li class="nav-item <?=in_array($file,array('estadisticas'))?'active':''?>">
+                      <a class="nav-link" href="<?=urladmin?>estadisticas.php">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                          <svg class="icon icon-tabler icon-tabler-chart-bar" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M9 8m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M15 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M4 20l14 0" /></svg>
+                        </span>
+                        <span class="nav-link-title">
+                          Estadísticas
+                        </span>
+                      </a>
+                    </li>
                     <li class="nav-item <?=in_array($file,array('usuarios','conversacion'))?'active':''?>">
                       <a class="nav-link" href="<?=urladmin?>usuarios.php">
                         <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
@@ -36,6 +46,16 @@ $file = basename($_SERVER["SCRIPT_FILENAME"],'.php');
                         </span>
                         <span class="nav-link-title">
                           Usuarios
+                        </span>
+                      </a>
+                    </li>
+                    <li class="nav-item <?=in_array($file,array('participaciones'))?'active':''?>">
+                      <a class="nav-link" href="<?=urladmin?>participaciones.php">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-list-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l11 0" /><path d="M9 12l11 0" /><path d="M9 18l11 0" /><path d="M5 6l0 0m0 6l0 0m0 6l0 0" /></svg>
+                        </span>
+                        <span class="nav-link-title">
+                          Participaciones
                         </span>
                       </a>
                     </li>

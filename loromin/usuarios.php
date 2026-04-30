@@ -9,14 +9,14 @@ if (empty($_SESSION['admin'])) {
 $flash = $_SESSION['admin_flash'] ?? null;
 unset($_SESSION['admin_flash']);
 
-$usuarios = db()->query("
+$statement = db()->prepare("
     SELECT
         u.id,
-        u.nombre,
-        u.apellido,
-        u.email,
-        u.celular,
-        u.dni,
+        CAST(AES_DECRYPT(u.nombre, :key1) AS CHAR) AS nombre,
+        CAST(AES_DECRYPT(u.apellido, :key2) AS CHAR) AS apellido,
+        CAST(AES_DECRYPT(u.email, :key3) AS CHAR) AS email,
+        CAST(AES_DECRYPT(u.celular, :key4) AS CHAR) AS celular,
+        CAST(AES_DECRYPT(u.dni, :key5) AS CHAR) AS dni,
         u.acepta_bases,
         u.fecha_registro,
         COUNT(p.id) as participaciones,
@@ -25,7 +25,17 @@ $usuarios = db()->query("
     LEFT JOIN participacion p ON p.usuario_id = u.id
     GROUP BY u.id
     ORDER BY u.fecha_registro DESC
-")->fetchAll();
+");
+
+$statement->execute([
+    ':key1' => AES_KEY,
+    ':key2' => AES_KEY,
+    ':key3' => AES_KEY,
+    ':key4' => AES_KEY,
+    ':key5' => AES_KEY,
+]);
+
+$usuarios = $statement->fetchAll();
 
 if (isset($_GET['xls']) && $_GET['xls'] === '1') {
     $filename = 'usuarios_' . date('Ymd_His') . '.xls';

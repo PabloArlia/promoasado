@@ -6,6 +6,6 @@
 - [X] Premios sembrados
 - [X] ENCRYPT AES
 - [ ] Estadísticas
-- [ ] Participaciones
+- [X] Participaciones
 - [ ] url friendy 
 
