@@ -20,7 +20,7 @@ header('X-XSS-Protection: 1; mode=block');
 // header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 
 // Content Security Policy - prevenir inyección de scripts
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' cdnjs.cloudflare.com; connect-src 'self'");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com; img-src 'self' data: https:; font-src 'self' cdnjs.cloudflare.com; connect-src 'self' nominatim.openstreetmap.org;");
 
 // Referrer Policy
 header('Referrer-Policy: strict-origin-when-cross-origin');
