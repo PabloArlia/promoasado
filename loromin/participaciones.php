@@ -6,6 +6,8 @@ if (empty($_SESSION['admin'])) {
     exit;
 }
 
+$soloGanadores = isset($_GET['ganadores']) && $_GET['ganadores'] === '1';
+
 $statement = db()->prepare("
     SELECT
         part.id,
@@ -15,6 +17,7 @@ $statement = db()->prepare("
         CAST(AES_DECRYPT(u.celular, :key4) AS CHAR) AS celular,
         CAST(AES_DECRYPT(u.dni, :key5) AS CHAR) AS dni,
         b.nombre as bar,
+        b.direccion as direccion,
         c.nombre as cadena,
         part.fecha_participacion,
         part.preguntas_aprobadas,
@@ -34,6 +37,7 @@ $statement = db()->prepare("
     LEFT JOIN semillas_horarias sh ON sh.participante_ganador_id = part.id
     LEFT JOIN premio p ON p.id = sh.premio
     LEFT JOIN intentos_botones ib ON ib.participante_id = part.id
+    " . ($soloGanadores ? "WHERE part.gano_juego = 1" : "") . "
     GROUP BY part.id
     ORDER BY part.fecha_participacion DESC
 ");
@@ -78,6 +82,8 @@ if (isset($_GET['xls']) && $_GET['xls'] === '1') {
     echo '<th>Celular</th>';
     echo '<th>DNI</th>';
     echo '<th>Bar</th>';
+    echo '<th>Cadena</th>';
+    echo '<th>Dirección</th>';
     echo '<th>Fecha Participación</th>';
     echo '<th>Preguntas Aprobadas</th>';
     echo '<th>Ganó Juego</th>';
@@ -101,6 +107,8 @@ if (isset($_GET['xls']) && $_GET['xls'] === '1') {
         echo '<td>' . htmlspecialchars($part['celular'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars($part['dni'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars($part['bar'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
+        echo '<td>' . htmlspecialchars($part['cadena'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
+        echo '<td>' . htmlspecialchars($part['direccion'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars($part['fecha_participacion'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . ($part['preguntas_aprobadas'] ? 'Sí' : 'No') . '</td>';
         echo '<td>' . ($part['gano_juego'] ? 'Sí' : 'No') . '</td>';
@@ -127,8 +135,14 @@ include 'header.php';
                 <h2 class="page-title">Participaciones</h2>
             </div>
             <div class="col-auto ms-auto">
-                <a href="?xls=1" class="btn btn-success me-2">Descargar XLS</a>
-            </div>
+    <?php if ($soloGanadores): ?>
+        <a href="?" class="btn btn-secondary me-2">Mostrar todos</a>
+        <a href="?ganadores=1&xls=1" class="btn btn-success me-2">Descargar XLS ganadores</a>
+    <?php else: ?>
+        <a href="?ganadores=1" class="btn btn-primary me-2">Mostrar solo ganadores</a>
+        <a href="?xls=1" class="btn btn-success me-2">Descargar XLS</a>
+    <?php endif; ?>
+</div>
         </div>
     </div>
 </div>
@@ -147,6 +161,8 @@ include 'header.php';
                                 <th>Email</th>
                                 <th>Celular</th>
                                 <th>Bar</th>
+                                <th>Cadena</th>
+                                <th>Dirección</th>
                                 <th>Fecha</th>
                                 <th>Gano</th>
                                 <th>Botón 1</th>
@@ -187,6 +203,12 @@ include 'header.php';
                                     </td>
                                     <td>
                                         <?=htmlspecialchars($part['bar'] ?? 'N/A', ENT_QUOTES, 'UTF-8')?>
+                                    </td>
+                                    <td>
+                                        <?=htmlspecialchars($part['cadena'] ?? 'N/A', ENT_QUOTES, 'UTF-8')?>
+                                    </td>
+                                    <td>
+                                        <?=htmlspecialchars($part['direccion'] ?? 'N/A', ENT_QUOTES, 'UTF-8')?>
                                     </td>
                                     <td>
                                         <?=htmlspecialchars($part['fecha_participacion'], ENT_QUOTES, 'UTF-8')?>
@@ -256,7 +278,7 @@ include 'header.php';
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="11" class="text-center text-muted">
+                                    <td colspan="17" class="text-center text-muted">
                                         No hay participaciones registradas
                                     </td>
                                 </tr>

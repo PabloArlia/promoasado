@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                $statement = $pdo->prepare(
                     'INSERT INTO usuarios
-                        (nombre, apellido, email, email_hash, celular, dni, dni_hash, acepta_bases, fecha_registro)
+                        (nombre, apellido, email, email_hash, celular, dni, dni_hash, fuente, acepta_bases, fecha_registro)
                     VALUES
                         (
                             AES_ENCRYPT(:nombre, :key1),
@@ -173,6 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             AES_ENCRYPT(:celular, :key4),
                             AES_ENCRYPT(:dni_enc, :key5),
                             SHA2(:dni_hash, 256),
+                            :fuente,
                             1,
                             NOW()
                         )'
@@ -186,6 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':celular' => $values['celular'],
                     ':dni_enc' => $values['dni'],
                     ':dni_hash' => $values['dni'],
+                    ':fuente' => $_SESSION['fuente'] ?? null,
                     ':key1' => AES_KEY,
                     ':key2' => AES_KEY,
                     ':key3' => AES_KEY,
@@ -217,7 +219,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-var_dump($errors);
 require_once __DIR__ . '/includes/header.php';
 ?>
 <section class="content-card narrow-card registro-card">

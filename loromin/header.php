@@ -95,6 +95,7 @@ $file = basename($_SERVER["SCRIPT_FILENAME"],'.php');
                         </a>
                       </div>
                     </li>
+                    <?php if (($_SESSION['admin'] ?? null) === 'lumia'): ?>
                     <li class="nav-item dropdown <?=in_array($file,array('premio','sembrados_horarios','calendario_sembrados'))?'active':''?>">
                       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -116,6 +117,7 @@ $file = basename($_SERVER["SCRIPT_FILENAME"],'.php');
                         </a>
                       </div>
                     </li>
+                    <?php endif; ?>
                     <li class="nav-item">
                       <a target="_blank" class="nav-link" href="<?=urladmin?>../">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">

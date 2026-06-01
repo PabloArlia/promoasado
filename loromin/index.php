@@ -3,8 +3,8 @@ require_once __DIR__ . '/init.php';
 
 $error = false;
 if (isset($_POST['user'])) {
-	if ((($_POST['user']=='lumia') && ($_POST['pass']=='sdpLumia07')) || (($_POST['user']=='kiasmitor') && ($_POST['pass']=='4dragons$'))) {
-		$_SESSION['admin']= 'hola';
+	if ((($_POST['user']=='lumia') && ($_POST['pass']=='sdpLumia07')) || (($_POST['user']=='unimistrador') && ($_POST['pass']=='4dragons$'))) {
+		$_SESSION['admin']= ($_POST['user']);
 		header('Location: '.urladmin.'usuarios.php');
 		exit;
 	} else {

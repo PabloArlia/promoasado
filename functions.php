@@ -1,12 +1,47 @@
 <?php
 declare(strict_types=1);
 
+$queryIdentifier = null;
+$querySource = null;
+$hasQuerySource = false;
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $queryParts = array_filter(explode('&', (string) $_SERVER['QUERY_STRING']));
+    $ignoredQueryKeys = ['preview', 'salir'];
+
+    foreach ($queryParts as $part) {
+        $key = urldecode(strtok($part, '='));
+
+        if ($key === '' || in_array($key, $ignoredQueryKeys, true)) {
+            continue;
+        }
+
+        if ($queryIdentifier === null) {
+            $queryIdentifier = $key;
+            continue;
+        }
+
+        $hasQuerySource = true;
+
+        if (preg_match('/^[a-zA-Z]+$/', $key)) {
+            $querySource = strtolower($key);
+        }
+
+        break;
+    }
+}
+
+if ($querySource !== null) {
+    $_SESSION['fuente'] = $querySource;
+} elseif ($hasQuerySource) {
+    unset($_SESSION['fuente']);
+}
+
 
 // Validar y guardar cadena en sesión si viene en URL
 if (!empty($_SERVER['QUERY_STRING'])) {
-    $queryString = $_SERVER['QUERY_STRING'];
+    $queryString = $queryIdentifier ?? $_SERVER['QUERY_STRING'];
     // Si no tiene '=', es el identificador de la cadena
-    if (strpos($queryString, '=') === false) {
+    if ($queryIdentifier !== null || (strpos($queryString, '=') === false && !in_array($queryString, ['preview', 'salir'], true))) {
         $identificador = (string) $queryString;
         // Verificar si la cadena existe en la base de datos
         if (getCadenaIdByIdentificador($identificador) !== null) {
@@ -19,8 +54,10 @@ if (!empty($_SERVER['QUERY_STRING'])) {
 }
 
 
-// Si no hay cadena, redirigir a error (excepto si ya estamos en error_cadena)
-if (!isset($_SESSION['cadena']) && basename($_SERVER['SCRIPT_FILENAME']) !== 'error_cadena.php') {
+// Si no hay cadena, redirigir a error (excepto si ya estamos en error_cadena o en el admin)
+$isAdmin = defined('IS_ADMIN_PANEL') && IS_ADMIN_PANEL;
+
+if (!$isAdmin && !isset($_SESSION['cadena']) && basename($_SERVER['SCRIPT_FILENAME']) !== 'error_cadena.php') {
     header('Location: error_cadena');
     exit;
 }

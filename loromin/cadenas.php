@@ -67,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $cadenas = $db->query("SELECT * FROM cadenas ORDER BY id ASC")->fetchAll();
 $title = 'Cadenas';
+$publicBaseUrl = 'https://promohellmannsasado.com.ar/';
 include 'header.php';
 ?>
 <div class="page-header d-print-none">
@@ -93,7 +94,8 @@ include 'header.php';
                                 <th>Identificador</th>
                                 <th style="width:240px">Logo</th>
                                 <th>Bares</th>
-                                <th>Enlace</th>
+                                <th>Mostrador</th>
+                                <th>Delivery</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -114,8 +116,26 @@ include 'header.php';
                                     <input type="hidden" class="f-logo-actual" value="<?= htmlspecialchars($c['logo'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                 </div>
                             </td>
+                            <?php
+                            $identificador = (string)$c['identificador'];
+                            $urlMostrador = $publicBaseUrl . '?' . $identificador . '&mostrador';
+                            $urlDelivery = $publicBaseUrl . '?' . $identificador . '&delivery';
+                            $qrMostrador = 'https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=' . rawurlencode($urlMostrador);
+                            $qrDelivery = 'https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=' . rawurlencode($urlDelivery);
+                            ?>
                             <td><a href="bares.php?cadena=<?= (int)$c['id'] ?>" class="btn btn-ghost-secondary">Ver bares</a></td>
-                            <td><a href="../?<?= htmlspecialchars($c['identificador'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-ghost-primary" target="_blank">Acceder</a></td>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <a href="<?= htmlspecialchars($urlMostrador, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-ghost-primary" target="_blank">Acceder</a>
+                                    <a href="<?= htmlspecialchars($qrMostrador, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-outline-secondary btn-sm" target="_blank">Crear QR</a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <a href="<?= htmlspecialchars($urlDelivery, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-ghost-primary" target="_blank">Acceder</a>
+                                    <a href="<?= htmlspecialchars($qrDelivery, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-outline-secondary btn-sm" target="_blank">Crear QR</a>
+                                </div>
+                            </td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-primary btn-save">&#10003; Guardar</button>
@@ -137,6 +157,7 @@ include 'header.php';
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td>
                                 <button class="btn btn-primary btn-save">+ Agregar</button>
                             </td>
                         </tr>
@@ -159,6 +180,19 @@ function showErr(msgs) {
     var el = document.getElementById('errbox');
     el.innerHTML = msgs.map(function(m){ return '<div>'+m+'</div>'; }).join('');
     el.style.display = '';
+}
+function promoUrl(ident, fuente) {
+    return 'https://promohellmannsasado.com.ar/?' + ident + '&' + fuente;
+}
+function qrUrl(url) {
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=' + encodeURIComponent(url);
+}
+function accessCellHtml(ident, fuente) {
+    var url = promoUrl(ident, fuente);
+    return '<div class="d-flex flex-column gap-1">'
+        + '<a href="' + url + '" class="btn btn-ghost-primary" target="_blank">Acceder</a>'
+        + '<a href="' + qrUrl(url) + '" class="btn btn-outline-secondary btn-sm" target="_blank">Crear QR</a>'
+        + '</div>';
 }
 document.addEventListener('click', function(e) {
     var btn = e.target.closest('.btn-save');
@@ -187,7 +221,8 @@ document.addEventListener('click', function(e) {
                     row.dataset.id = data.id;
                     row.cells[0].textContent = data.id;
                     row.cells[4].innerHTML = '<a href="bares.php?cadena=' + data.id + '" class="btn btn-ghost-secondary">Ver bares</a>';
-                    row.cells[5].innerHTML = '<a href="../index.php?' + ident + '" class="btn btn-ghost-primary" target="_blank">Acceder</a>';
+                    row.cells[5].innerHTML = accessCellHtml(ident, 'mostrador');
+                    row.cells[6].innerHTML = accessCellHtml(ident, 'delivery');
                     var nr = document.getElementById('row-new');
                     if (nr) { nr.querySelector('.f-nombre').value=''; nr.querySelector('.f-identificador').value=''; var nf=nr.querySelector('.f-logo-file'); if(nf) nf.value=''; }
                 }

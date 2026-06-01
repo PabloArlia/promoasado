@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/init.php';
 
-if (empty($_SESSION['admin'])) {
+if (($_SESSION['admin'] ?? null) !== 'lumia') {
     header('Location: ' . urladmin . 'index.php');
     exit;
 }
@@ -18,17 +18,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'save') {
         $id     = isset($_POST['id']) && $_POST['id'] !== '' ? (int)$_POST['id'] : null;
         $nombre = trim($_POST['nombre'] ?? '');
+        $ganaste = trim($_POST['ganaste'] ?? '') ?: null; // Nuevo campo 'ganaste'
         $imagen = trim($_POST['imagen'] ?? '') ?: null;
 
         $errs = [];
         if ($nombre === '') $errs[] = 'El nombre es obligatorio.';
 
         if ($errs) { http_response_code(422); echo json_encode(['errors' => $errs]); exit; }
-
+        
         if ($id) {
-            $db->prepare("UPDATE premio SET nombre=?, imagen=? WHERE id=?")->execute([$nombre, $imagen, $id]);
+            $db->prepare("UPDATE premio SET nombre=?, ganaste=?, imagen=? WHERE id=?")->execute([$nombre, $ganaste, $imagen, $id]);
         } else {
-            $db->prepare("INSERT INTO premio (nombre, imagen) VALUES (?,?)")->execute([$nombre, $imagen]);
+            $db->prepare("INSERT INTO premio (nombre, ganaste, imagen) VALUES (?,?,?)")->execute([$nombre, $ganaste, $imagen]);
             $id = (int)$db->lastInsertId();
         }
         echo json_encode(['ok' => true, 'id' => $id]);
@@ -78,6 +79,7 @@ include 'header.php';
                             <tr>
                                 <th style="width:40px">#</th>
                                 <th>Nombre</th>
+                                <th>Mensaje Ganaste</th>
                                 <th>Imagen</th>
                                 <th></th>
                             </tr>
@@ -86,8 +88,9 @@ include 'header.php';
                             <?php foreach ($premios as $premio): ?>
                             <tr>
                                 <td><?php echo $premio['id']; ?></td>
-                                <td><?php echo esc($premio['nombre']); ?></td>
-                                <td><?php if ($premio['imagen']): ?><img src="<?php echo esc($premio['imagen']); ?>" alt="" style="max-width:100px; max-height:50px;"> <?php echo esc($premio['imagen']); ?><?php endif; ?></td>
+                                <td><?php echo esc($premio['nombre']); ?></td>                                
+                                <td><?php echo esc($premio['ganaste'] ?? 'N/A'); ?></td>
+                                <td><?php if ($premio['imagen']): ?><img src="<?php echo esc('../' . $premio['imagen']); ?>" alt="" style="max-width:100px; max-height:50px;"> <?php echo esc($premio['imagen']); ?><?php endif; ?></td>
                                 <td>
                                     <div class="btn-list flex-nowrap">
                                         <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal-edit-<?php echo $premio['id']; ?>">
@@ -127,6 +130,12 @@ include 'header.php';
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
+                                <label class="form-label">Mensaje "Ganaste"</label>
+                                <input type="text" class="form-control" name="ganaste" placeholder="Ej: GANASTE UN LCD">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
                                 <label class="form-label">Imagen</label>
                                 <input type="text" class="form-control" name="imagen" placeholder="Ruta de la imagen">
                             </div>
@@ -158,6 +167,12 @@ include 'header.php';
                             <div class="mb-3">
                                 <label class="form-label">Nombre</label>
                                 <input type="text" class="form-control" name="nombre" value="<?php echo esc($premio['nombre']); ?>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Mensaje "Ganaste"</label>
+                                <input type="text" class="form-control" name="ganaste" value="<?php echo esc($premio['ganaste'] ?? ''); ?>" placeholder="Ej: GANASTE UN LCD">
                             </div>
                         </div>
                         <div class="col-md-6">

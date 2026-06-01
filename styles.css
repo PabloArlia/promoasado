@@ -599,3 +599,145 @@ body {
     color: #fff;
     margin-bottom: 20px;
 }
+
+.bases-card {
+	padding: 0 1rem 2rem;
+	color: #fff7cf;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	font-size: 1rem;
+	line-height: 1.4;
+}
+
+.bases-card .arma-img {
+	margin-bottom: 0.5rem;
+}
+
+.bases-card,
+.bases-card * {
+	max-width: 100%;
+}
+
+.bases-card font,
+.bases-card span {
+	font: inherit;
+	color: inherit;
+}
+
+.bases-card > p:first-of-type,
+.bases-card > p:nth-of-type(2) {
+	margin: 0;
+	text-align: center;
+	font-family: "DollopSerifCondensed", Arial, sans-serif;
+	font-size: 2.2rem;
+	line-height: 1;
+	color: #fff;
+}
+
+.bases-card > p:nth-of-type(2) {
+	margin-top: 0.35rem;
+	margin-bottom: 1.25rem;
+	font-size: 1.45rem;
+	color: #fca559;
+}
+
+.bases-card p {
+	margin: 0.65rem 0;
+}
+
+.bases-card p:has(> br:first-child:last-child),
+.bases-card p:has(> br:first-child:nth-last-child(2)) {
+	display: none;
+}
+
+.bases-card b,
+.bases-card strong {
+	color: #fff;
+	font-weight: 700;
+}
+
+.bases-card .legal-heading {
+	margin-top: 1.2rem;
+	color: #fff;
+	font-family: "DollopSerifExpanded", Arial, sans-serif;
+	font-size: 0.92rem;
+	line-height: 1.25;
+	text-transform: uppercase;
+}
+
+.bases-card a {
+	color: #f9da0d;
+	overflow-wrap: anywhere;
+}
+
+.bases-card ol,
+.bases-card ul {
+	margin: 0.7rem 0 0.7rem 0.7rem;
+	padding-left: 0.8rem;
+}
+
+.bases-card ol ol {
+	margin: 0;
+	padding: 0;
+}
+
+.bases-card li {
+	margin: 0.35rem 0;
+	padding-left: 0.15rem;
+}
+
+.bases-card table,
+.bases-card tbody,
+.bases-card tr,
+.bases-card td {
+	display: block;
+	width: 100%;
+}
+
+.bases-card table {
+	margin: 1rem 0 1.5rem;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+.bases-card tr {
+	margin: 0 0 0.85rem;
+	overflow: hidden;
+	background: rgba(0, 0, 0, 0.68);
+	border: 2px solid #432011;
+	border-radius: 8px;
+	box-shadow: 0 0 0 1px rgba(249, 218, 13, 0.18);
+}
+
+.bases-card td {
+	padding: 0.5rem;
+	vertical-align: top;
+}
+
+.bases-card td:first-child {
+	background: #432011;
+	color: #f9da0d;
+	border-bottom: 2px solid rgba(249, 218, 13, 0.55);
+	font-family: "DollopSerifExpanded", Arial, sans-serif;
+	font-size: 0.82rem;
+	line-height: 1.25;
+	text-transform: uppercase;
+}
+
+.bases-card td:last-child {
+	color: #fff7cf;
+}
+
+.bases-card td p:first-child {
+	margin-top: 0;
+}
+
+.bases-card td p:last-child {
+	margin-bottom: 0;
+}
+
+@media (min-width: 520px) {
+	.bases-card {
+		padding-left: 1.25rem;
+		padding-right: 1.25rem;
+	}
+}
