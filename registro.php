@@ -30,10 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $values[$key] = trim((string) ($_POST[$key] ?? ''));
     }
 
-    $shouldTryLogin = ($values['email'] !== '' || $values['dni'] !== '');
-    $hasExtraData = ($values['nombre'] !== '' || $values['apellido'] !== '' || $values['celular'] !== '') || !$shouldTryLogin;
+    $hasLoginIdentifier = ($values['email'] !== '' || $values['dni'] !== '');
+    $hasExtraData = ($values['nombre'] !== '' || $values['apellido'] !== '' || $values['celular'] !== '') || !$hasLoginIdentifier;
+    $hasIdentityPair = ($values['email'] !== '' && $values['dni'] !== '');
+    $shouldTryLogin = (!$hasExtraData && $hasLoginIdentifier) || ($hasExtraData && $hasIdentityPair);
+    $skipRegistration = false;
 
-    if ($shouldTryLogin && !$hasExtraData) {
+    if ($shouldTryLogin) {
         if ($values['email'] !== '' && !filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
             $fieldErrors['email'] = 'Ingresá un email válido.';
             $errors[] = $fieldErrors['email'];
@@ -52,8 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $fieldErrors['email'] = 'El email y el DNI corresponden a usuarios distintos.';
                 $fieldErrors['dni'] = 'El email y el DNI corresponden a usuarios distintos.';
                 $errors[] = $fieldErrors['email'];
+                $skipRegistration = $hasExtraData;
             } else {
-                $user = $userByEmail ?? $userByDni;
+                $user = $hasExtraData
+                    ? (($userByEmail !== null && $userByDni !== null) ? $userByEmail : null)
+                    : ($userByEmail ?? $userByDni);
 
                 if ($user === null) {
                     if (!$hasExtraData) {
@@ -68,6 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
                 } else {
+                    $skipRegistration = $hasExtraData;
+
                     try {
                         $participationId = loginUserForToday((int) $user['id']);
                         $_SESSION['participante_id'] = $participationId;
@@ -97,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        if (!$errors) {
+        if (!$hasExtraData && !$errors) {
             if ($values['email'] !== '') {
                 $fieldErrors['email'] = 'No existe un usuario con ese email.';
                 $errors[] = $fieldErrors['email'];
@@ -109,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($hasExtraData) {
+    if ($hasExtraData && !$skipRegistration) {
         
         $acepta_ubicacion = isset($_POST['acepta_ubicacion']) && $_POST['acepta_ubicacion'] === '1';
         if (!$acepta_ubicacion) {
